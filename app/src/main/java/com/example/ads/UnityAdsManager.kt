@@ -37,9 +37,8 @@ object UnityAdsManager {
     val BACKUP_INTERSTITIAL_PLACEMENTS = listOf(PLACEMENT_INTERSTITIAL)
     val BACKUP_REWARDED_PLACEMENTS = listOf(PLACEMENT_REWARDED)
 
-    // Test mode: true during debug/emulator builds to guarantee 100% ad fills and prevent "No fill" errors.
-    // Automatically false in release builds to serve live production revenue-generating ads.
-    val TEST_MODE: Boolean = com.example.BuildConfig.DEBUG
+    // Test mode: false = Real live production ads for maximum revenue
+    const val TEST_MODE = false
 
     private val isInitialized = AtomicBoolean(false)
     private var isInitializing = false
