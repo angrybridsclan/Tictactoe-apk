@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tic Tac Toe</string>
+    <string name="app_subtitle">NEON CYBER EDITION</string>
+    <string name="app_package_display">com.aistudio.tictactoe.neon</string>
+    <string name="app_version_display">1.0.0 (Build 1)</string>
+    
+    <!-- Mode Selection -->
+    <string name="title_select_level">SELECT GAME MODE</string>
+    <string name="vs_computer">Single Player (vs AI)</string>
+    <string name="vs_computer_desc">Challenge the Smart Cyber AI Engine</string>
+    <string name="vs_player">Two Players (Pass &amp; Play)</string>
+    <string name="vs_player_desc">Play with a friend on the same screen</string>
+    
+    <!-- AI Difficulties -->
+    <string name="difficulty_easy">EASY</string>
+    <string name="difficulty_medium">MEDIUM</string>
+    <string name="difficulty_hard">UNBEATABLE</string>
+    
+    <!-- Game Labels -->
+    <string name="player_x">PLAYER X</string>
+    <string name="player_o">PLAYER O</string>
+    <string name="turn_x">Player X\'s Turn</string>
+    <string name="turn_o">Player O\'s Turn</string>
+    <string name="turn_ai">AI is Thinking...</string>
+    <string name="winner_x">⚡ Player X Wins! ⚡</string>
+    <string name="winner_o">💖 Player O Wins! 💖</string>
+    <string name="winner_ai">🤖 AI Wins! 🤖</string>
+    <string name="draw_game">🤝 Match Draw! 🤝</string>
+    
+    <!-- Action Buttons -->
+    <string name="btn_play_again">PLAY AGAIN</string>
+    <string name="btn_reset_scores">Reset Score</string>
+    <string name="btn_settings">Settings</string>
+    <string name="btn_privacy">Privacy Policy</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_close">Close</string>
+    <string name="btn_watch_ad">Watch Ad (+500 Cyber XP)</string>
+    
+    <!-- Scoreboard -->
+    <string name="score_x">PLAYER X</string>
+    <string name="score_ties">DRAWS</string>
+    <string name="score_o">PLAYER O</string>
+    <string name="score_ai">AI (BOT)</string>
+    
+    <!-- Developer & Privacy -->
+    <string name="developer_name">Mahinur Rahman Saif</string>
+    <string name="developer_email">mahinurrahmansaif@gmail.com</string>
+    <string name="privacy_title">Privacy Policy &amp; Info</string>
+</resources>

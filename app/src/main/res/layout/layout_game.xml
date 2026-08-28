@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_game_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:visibility="gone">
+
+    <!-- Top Bar -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/btn_game_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            android:src="@drawable/ic_back_arrow" />
+
+        <TextView
+            android:id="@+id/tv_game_mode_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="VS AI (MEDIUM)"
+            android:textColor="@color/neon_cyan"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btn_game_sound"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Toggle Sound"
+                android:src="@drawable/ic_volume_up" />
+
+            <ImageButton
+                android:id="@+id/btn_game_reset"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Restart Round"
+                android:src="@drawable/ic_refresh" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Scoreboard Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_card_cyber"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:weightSum="3">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_game_score_x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/neon_cyan"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PLAYER X"
+                android:textColor="@color/text_muted"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_game_score_draws"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/neon_gold"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DRAWS"
+                android:textColor="@color/text_muted"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_game_score_o"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/neon_pink"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_game_label_o"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI (BOT)"
+                android:textColor="@color/text_muted"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Turn Status Banner -->
+    <LinearLayout
+        android:id="@+id/banner_turn_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_chip_selected"
+        android:gravity="center"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/tv_turn_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/turn_x"
+            android:textColor="@color/neon_cyan"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- 3x3 Tic Tac Toe Game Grid -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <!-- Row 0 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_cell_0"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_cell_1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_cell_2"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Row 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_cell_3"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_cell_4"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_cell_5"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Row 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_cell_6"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_cell_7"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_cell_8"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cell_empty"
+                    android:textColor="@color/neon_cyan"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Bottom Actions: Play Again -->
+    <Button
+        android:id="@+id/btn_play_again"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_button_neon_cyan"
+        android:text="@string/btn_play_again"
+        android:textColor="@color/neon_cyan"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

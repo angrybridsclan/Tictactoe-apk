@@ -1,0 +1,6 @@
+{
+  "name": "Tic Tac Toe",
+  "description": "A glowing neon Tic Tac Toe game with smooth animations, 3x3, 6x6 & 12x12 grid modes, cyber background soundtrack, settings panel, and expanded neon theme collection.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

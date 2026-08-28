@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Neon Cyber Palette -->
+    <color name="cyber_bg_dark">#FF070B14</color>
+    <color name="cyber_bg_dark_gradient">#FF0F172A</color>
+    <color name="cyber_surface">#FF131D33</color>
+    <color name="cyber_surface_light">#FF1E293B</color>
+    
+    <!-- Neon Glow Accents -->
+    <color name="neon_cyan">#FF00F0FF</color>
+    <color name="neon_cyan_dark">#FF0099A8</color>
+    <color name="neon_cyan_glow">#4400F0FF</color>
+    
+    <color name="neon_pink">#FFFF007F</color>
+    <color name="neon_pink_dark">#FFB30059</color>
+    <color name="neon_pink_glow">#44FF007F</color>
+    
+    <color name="neon_purple">#FFA855F7</color>
+    <color name="neon_purple_dark">#FF7E22CE</color>
+    <color name="neon_purple_glow">#44A855F7</color>
+    
+    <color name="neon_gold">#FFFFD700</color>
+    <color name="neon_gold_dark">#FFCCAC00</color>
+    <color name="neon_gold_glow">#44FFD700</color>
+    
+    <color name="neon_green">#FF00FF88</color>
+    <color name="neon_green_glow">#4400FF88</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#FFF8FAFC</color>
+    <color name="text_secondary">#FF94A3B8</color>
+    <color name="text_muted">#FF64748B</color>
+</resources>
