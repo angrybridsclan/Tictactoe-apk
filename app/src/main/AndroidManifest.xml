@@ -20,6 +20,10 @@
         android:theme="@style/Theme.MyApplication">
 
         <!-- Unity Ads Game ID: 5857887 -->
+        <!-- Google AdMob App ID -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6949224585585477~4176392925" />
 
         <activity
             android:name=".MainActivity"

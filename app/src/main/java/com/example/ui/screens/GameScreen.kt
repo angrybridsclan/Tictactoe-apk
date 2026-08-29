@@ -52,7 +52,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ads.UnityBannerAd
+import com.example.ads.DualBannerAd
 import com.example.model.GameMode
 import com.example.model.GameUiState
 import com.example.model.OpponentType
@@ -217,8 +217,8 @@ fun GameScreen(
                 )
             }
 
-            // Unity Banner Ad BELOW the Tic Tac Toe board
-            UnityBannerAd(
+            // Dual Banner Ad (AdMob + Unity Ads) BELOW the Tic Tac Toe board
+            DualBannerAd(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 2.dp)

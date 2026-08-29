@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.components.NeonGlowBackground
 import com.example.ui.theme.NeonCoral
 import com.example.ui.theme.NeonCyan
 import com.example.ui.theme.NeonDarkBg
@@ -112,50 +113,15 @@ fun LoadingScreen(
         onLoadingFinished()
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF220A45),
-                        NeonDarkBg,
-                        Color(0xFF06020E)
-                    ),
-                    radius = 900f
-                )
-            )
-            .testTag("loading_screen"),
-        contentAlignment = Alignment.Center
+    NeonGlowBackground(
+        modifier = Modifier.testTag("loading_screen")
     ) {
-        // Background Matrix Grid Lines
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val step = 40.dp.toPx()
-            val w = size.width
-            val h = size.height
-
-            for (x in 0..(w / step).toInt()) {
-                drawLine(
-                    color = NeonPurpleBorder.copy(alpha = 0.12f),
-                    start = Offset(x * step, 0f),
-                    end = Offset(x * step, h),
-                    strokeWidth = 1f
-                )
-            }
-            for (y in 0..(h / step).toInt()) {
-                drawLine(
-                    color = NeonPurpleBorder.copy(alpha = 0.12f),
-                    start = Offset(0f, y * step),
-                    end = Offset(w, y * step),
-                    strokeWidth = 1f
-                )
-            }
-        }
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(28.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(28.dp)
         ) {
             // Cyber Animated Icon Ring
             Box(

@@ -129,6 +129,10 @@ object UnityAdsManager {
 
     fun isReady(): Boolean = UnityAds.isInitialized || isInitialized.get()
 
+    fun isInterstitialReady(): Boolean = isReady()
+
+    fun isRewardedReady(): Boolean = isReady()
+
     fun preloadAds(context: Context) {
         if (!isReady()) return
         loadInterstitial(context, PLACEMENT_INTERSTITIAL)

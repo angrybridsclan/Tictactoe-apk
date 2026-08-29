@@ -31,7 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.ads.UnityAdsManager
+import com.example.ads.AppOpenAdManager
+import com.example.ads.DualAdsManager
 import com.example.audio.CyberMusicPlayer
 import com.example.notification.NotificationHelper
 import com.example.ui.components.LevelDifficultyDialog
@@ -59,8 +60,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Initialize Unity Ads & Preload Interstitial and Rewarded Ads (Game ID: 5857887)
-        UnityAdsManager.initialize(applicationContext)
+        // Initialize Dual Ad Mediation (AdMob + Unity Ads) for maximum fill & revenue
+        DualAdsManager.initialize(applicationContext)
 
         // Initialize Notification Channels
         NotificationHelper.createNotificationChannels(applicationContext)
@@ -79,6 +80,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Try showing AdMob App Open Ad if available
+        AppOpenAdManager.showAdIfAvailable(this)
         // Cancel pending inactivity notification since user is active
         NotificationHelper.cancelOfflineReminder(this)
         // Resume background soundtrack if enabled

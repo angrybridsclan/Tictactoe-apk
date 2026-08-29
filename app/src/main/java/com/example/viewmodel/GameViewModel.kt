@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ads.UnityAdsManager
+import com.example.ads.DualAdsManager
 import com.example.audio.CyberMusicPlayer
 import com.example.audio.NeonSoundManager
 import com.example.game.TicTacToeEngine
@@ -43,8 +43,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
     init {
-        // Initialize Unity Ads and preload ads (Game ID: 5857887)
-        UnityAdsManager.initialize(application.applicationContext)
+        // Initialize Dual Ad Mediation (AdMob + Unity Ads) for maximum fill and revenue
+        DualAdsManager.initialize(application.applicationContext)
         // Start background cyber soundtrack if enabled
         if (userDataManager.isMusicEnabled) {
             CyberMusicPlayer.startMusic(true)
@@ -173,7 +173,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        UnityAdsManager.showRewardedAd(
+        DualAdsManager.showRewardedAd(
             activity = activity,
             onUserEarnedReward = {
                 val newTotal = userDataManager.addCoins(100)
@@ -188,7 +188,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             onAdNotReady = {
                 _uiState.update {
                     it.copy(
-                        rewardToastMessage = "Unity Reward Ad is loading, please try again."
+                        rewardToastMessage = "Reward Ad is loading, please try again."
                     )
                 }
             }
@@ -212,7 +212,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        UnityAdsManager.showRewardedAd(
+        DualAdsManager.showRewardedAd(
             activity = activity,
             onUserEarnedReward = {
                 val newTotal = userDataManager.addCoins(earned)
@@ -228,7 +228,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             onAdNotReady = {
                 _uiState.update {
                     it.copy(
-                        rewardToastMessage = "Unity Reward Ad is loading, please try again."
+                        rewardToastMessage = "Reward Ad is loading, please try again."
                     )
                 }
             }
@@ -440,8 +440,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         // Show ad loading flag if interstitial ready
         _uiState.update { it.copy(isAdLoading = true) }
 
-        // Trigger interstitial ad check between matches (every 1 match)
-        UnityAdsManager.onMatchFinished(activity) {
+        // Trigger interstitial ad check between matches (Dual Waterfall: AdMob -> Unity Ads)
+        DualAdsManager.onMatchFinished(activity) {
             _uiState.update { state ->
                 val totalCells = state.mode.gridSize * state.mode.gridSize
                 state.copy(

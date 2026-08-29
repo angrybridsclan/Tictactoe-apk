@@ -57,7 +57,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ads.UnityBannerAd
+import com.example.ads.AdMobNativeAdView
+import com.example.ads.DualBannerAd
 import com.example.ads.UnityNativeAd
 import com.example.model.AIDifficulty
 import com.example.model.GameMode
@@ -448,11 +449,20 @@ fun SelectLevelScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Optional AdMob Native Ad Card for maximum high eCPM impressions
+                AdMobNativeAdView(
+                    modifier = Modifier
+                        .fillMaxWidth(0.92f)
+                        .padding(vertical = 2.dp)
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
             }
 
-            // Bottom Banner Ad
-            UnityBannerAd(
+            // Bottom Dual Banner Ad (AdMob + Unity Ads Mediation)
+            DualBannerAd(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 2.dp)
