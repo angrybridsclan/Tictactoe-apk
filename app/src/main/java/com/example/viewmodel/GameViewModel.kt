@@ -37,7 +37,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             unlockedThemeIds = userDataManager.unlockedThemes,
             isSoundEnabled = userDataManager.isSoundEnabled,
             isMusicEnabled = userDataManager.isMusicEnabled,
-            isVibrationEnabled = userDataManager.isVibrationEnabled
+            isVibrationEnabled = userDataManager.isVibrationEnabled,
+            dailyStreakDay = userDataManager.getEffectiveDailyStreakDay(),
+            isDailyClaimedToday = userDataManager.isDailyRewardClaimedToday(),
+            isGiftEventClaimed = userDataManager.isDailyRewardClaimedToday(),
+            todayDailyRewardCoins = userDataManager.getRewardForDay(userDataManager.getEffectiveDailyStreakDay())
         )
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -45,9 +49,25 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     init {
         // Initialize Dual Ad Mediation (AdMob + Unity Ads) for maximum fill and revenue
         DualAdsManager.initialize(application.applicationContext)
+        // Refresh daily streak status
+        refreshDailyRewardState()
         // Start background cyber soundtrack if enabled
         if (userDataManager.isMusicEnabled) {
             CyberMusicPlayer.startMusic(true)
+        }
+    }
+
+    fun refreshDailyRewardState() {
+        val streak = userDataManager.getEffectiveDailyStreakDay()
+        val isClaimed = userDataManager.isDailyRewardClaimedToday()
+        val reward = userDataManager.getRewardForDay(streak)
+        _uiState.update {
+            it.copy(
+                dailyStreakDay = streak,
+                isDailyClaimedToday = isClaimed,
+                isGiftEventClaimed = isClaimed,
+                todayDailyRewardCoins = reward
+            )
         }
     }
 
@@ -153,15 +173,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun claimGiftEventReward() {
-        val newTotal = userDataManager.addCoins(250)
+        val (rewardCoins, claimedDay) = userDataManager.claimDailyReward()
         soundManager.playWinSound(_uiState.value.isSoundEnabled)
         _uiState.update {
             it.copy(
-                coins = newTotal,
+                coins = userDataManager.coins,
                 isGiftEventOpen = false,
                 giftEventSecondsLeft = 0,
                 isGiftEventClaimed = true,
-                rewardToastMessage = "🎉 Auto-Claimed: +250 OX Coins Added!"
+                isDailyClaimedToday = true,
+                dailyStreakDay = claimedDay,
+                todayDailyRewardCoins = rewardCoins,
+                rewardToastMessage = "🎉 Day $claimedDay Reward Claimed: +$rewardCoins OX Coins Added!"
             )
         }
     }

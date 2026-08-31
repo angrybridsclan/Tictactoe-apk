@@ -455,38 +455,54 @@ private fun DrawScope.drawLaserStrikeLine(
     theme: NeonTheme,
     winningPlayer: Player? = null
 ) {
+    // Exact dynamic color match: X uses playerXColor/Glow, O uses playerOColor/Glow
     val laserColor = if (winningPlayer == Player.X) theme.playerXColor else theme.playerOColor
     val laserGlowColor = if (winningPlayer == Player.X) theme.playerXGlow else theme.playerOGlow
 
+    val outerGlowWidth = when {
+        gridSize <= 3 -> 24f
+        gridSize <= 6 -> 18f
+        gridSize <= 12 -> 12f
+        else -> 7f
+    }
     val bloomWidth = when {
-        gridSize <= 3 -> 16f
-        gridSize <= 6 -> 12f
-        gridSize <= 12 -> 8f
-        else -> 5f
+        gridSize <= 3 -> 14f
+        gridSize <= 6 -> 10f
+        gridSize <= 12 -> 7f
+        else -> 4f
     }
     val beamWidth = when {
-        gridSize <= 3 -> 8f
-        gridSize <= 6 -> 6f
-        gridSize <= 12 -> 4f
-        else -> 2.5f
+        gridSize <= 3 -> 7f
+        gridSize <= 6 -> 5f
+        gridSize <= 12 -> 3.5f
+        else -> 2.2f
     }
     val coreWidth = when {
-        gridSize <= 3 -> 3.5f
-        gridSize <= 6 -> 2.6f
-        gridSize <= 12 -> 1.8f
-        else -> 1.2f
+        gridSize <= 3 -> 3.2f
+        gridSize <= 6 -> 2.4f
+        gridSize <= 12 -> 1.6f
+        else -> 1.0f
     }
 
-    // 1. Broad outer laser bloom
+    // 1. Ultra broad ambient neon glow
     drawLine(
-        color = laserColor.copy(alpha = 0.45f),
+        color = laserGlowColor.copy(alpha = 0.30f),
+        start = start,
+        end = end,
+        strokeWidth = outerGlowWidth,
+        cap = StrokeCap.Round
+    )
+
+    // 2. Main Player Color bloom (X / O color)
+    drawLine(
+        color = laserColor.copy(alpha = 0.75f),
         start = start,
         end = end,
         strokeWidth = bloomWidth,
         cap = StrokeCap.Round
     )
 
-    // 2. Focused vibrant beam
+    // 3. Focused high-intensity beam
     drawLine(
         color = laserColor,
         start = start,
@@ -495,7 +511,7 @@ private fun DrawScope.drawLaserStrikeLine(
         cap = StrokeCap.Round
     )
 
-    // 3. Ultra-bright white inner core
+    // 4. Ultra-bright white inner laser core
     drawLine(
         color = NeonWhite,
         start = start,
@@ -504,7 +520,22 @@ private fun DrawScope.drawLaserStrikeLine(
         cap = StrokeCap.Round
     )
 
-    // End point spark glow
+    // Start & End points cutting sparks with matching player color
+    drawCircle(
+        color = laserGlowColor.copy(alpha = 0.8f),
+        radius = coreWidth * 2.8f,
+        center = start
+    )
+    drawCircle(
+        color = NeonWhite,
+        radius = coreWidth * 1.5f,
+        center = start
+    )
+    drawCircle(
+        color = laserGlowColor.copy(alpha = 0.8f),
+        radius = coreWidth * 3.2f,
+        center = end
+    )
     drawCircle(
         color = NeonWhite,
         radius = coreWidth * 1.8f,

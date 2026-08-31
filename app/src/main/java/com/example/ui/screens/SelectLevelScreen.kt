@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -808,8 +809,8 @@ private fun LevelPreviewCard(
 }
 
 /**
- * Cyberpunk Daily Reward Card (replaces the old 300x250 ad space).
- * Direct trigger for the 30-second Auto-Claim +250 Coins sponsor mission.
+ * Cyberpunk 7-Day Daily Reward System (50, 100, 150, 200, 250, 300, 1000 Coins).
+ * Once per day claim with 30-second Auto-Claim & automatic return to Home Screen.
  */
 @Composable
 fun DailyRewardCard(
@@ -817,10 +818,12 @@ fun DailyRewardCard(
     onClaimClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isClaimed = uiState.isGiftEventClaimed
-    val secondsLeft = uiState.giftEventSecondsLeft
+    val isClaimedToday = uiState.isDailyClaimedToday
+    val currentDay = uiState.dailyStreakDay
+    val todayRewardCoins = uiState.todayDailyRewardCoins
+    val rewardsList = listOf(50, 100, 150, 200, 250, 300, 1000)
 
-    val cardBorderColor = if (isClaimed) Color(0xFF00E676) else NeonGold
+    val cardBorderColor = if (isClaimedToday) Color(0xFF00E676) else NeonGold
 
     Box(
         modifier = modifier
@@ -835,8 +838,7 @@ fun DailyRewardCard(
                 )
             )
             .border(2.dp, cardBorderColor.copy(alpha = 0.85f), RoundedCornerShape(18.dp))
-            .clickable { onClaimClick() }
-            .padding(14.dp)
+            .padding(12.dp)
             .testTag("daily_reward_card")
     ) {
         Column(
@@ -871,22 +873,22 @@ fun DailyRewardCard(
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "🎁 DAILY REWARD",
+                            text = "🎁 7-DAYS DAILY REWARD",
                             color = NeonGold,
-                            fontSize = 15.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 1.sp
+                            letterSpacing = 0.8.sp
                         )
                         Text(
-                            text = "Instant +250 Coins Mission",
-                            color = NeonCyanLight,
+                            text = if (isClaimedToday) "Claimed for today! Next reward tomorrow." else "Day $currentDay Active: Claim +$todayRewardCoins Coins!",
+                            color = if (isClaimedToday) Color(0xFF00E676) else NeonCyanLight,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
                 }
 
-                // Reward Tag
+                // Reward Streak Tag
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
@@ -895,9 +897,9 @@ fun DailyRewardCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "+250 🪙",
+                        text = "DAY $currentDay/7",
                         color = NeonGold,
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
@@ -905,21 +907,81 @@ fun DailyRewardCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Information description
-            val statusText = when {
-                isClaimed -> "✅ +250 Coins Claimed! Tap below to explore extra bonus rewards."
-                secondsLeft in 1..29 -> "⏳ Active Mission: ${secondsLeft}s remaining! Auto-claim will credit +250 Coins."
-                else -> "Stay 30s in the sponsor event & get +250 Coins automatically credited!"
-            }
+            // 7-Days Reward Horizontal Scroll / Grid
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                rewardsList.forEachIndexed { index, reward ->
+                    val dayNum = index + 1
+                    val isPastClaimed = dayNum < currentDay || (dayNum == currentDay && isClaimedToday)
+                    val isTodayActive = dayNum == currentDay && !isClaimedToday
+                    val isDay7 = dayNum == 7
 
-            Text(
-                text = statusText,
-                color = NeonWhite.copy(alpha = 0.9f),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 6.dp)
-            )
+                    val itemBg = when {
+                        isTodayActive -> Brush.verticalGradient(listOf(Color(0xFF6A1B9A), Color(0xFF311B92)))
+                        isPastClaimed -> Brush.verticalGradient(listOf(Color(0xFF1B5E20), Color(0xFF0A2E0E)))
+                        else -> Brush.verticalGradient(listOf(Color(0xFF1F1A3A), Color(0xFF120E24)))
+                    }
+
+                    val itemBorderColor = when {
+                        isTodayActive -> NeonGold
+                        isPastClaimed -> Color(0xFF00E676)
+                        isDay7 -> Color(0xFFFF4081)
+                        else -> Color(0xFF3A3459)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .width(62.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(itemBg)
+                            .border(1.5.dp, itemBorderColor, RoundedCornerShape(10.dp))
+                            .padding(vertical = 6.dp, horizontal = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Day $dayNum",
+                                color = if (isTodayActive) NeonGold else NeonWhite.copy(alpha = 0.8f),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            if (isPastClaimed) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Claimed",
+                                    tint = Color(0xFF00E676),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            } else {
+                                Text(
+                                    text = if (isDay7) "🔥" else "🪙",
+                                    fontSize = 13.sp
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            Text(
+                                text = "+$reward",
+                                color = if (isDay7) Color(0xFFFFD700) else if (isTodayActive) NeonGold else NeonWhite,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -930,14 +992,18 @@ fun DailyRewardCard(
                     .height(44.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (isClaimed) {
-                            Brush.horizontalGradient(listOf(Color(0xFF00C853), Color(0xFF00E676)))
+                        if (isClaimedToday) {
+                            Brush.horizontalGradient(listOf(Color(0xFF2E7D32), Color(0xFF1B5E20)))
                         } else {
                             Brush.horizontalGradient(listOf(Color(0xFFFFB300), Color(0xFFFF6D00), Color(0xFFFFAB00)))
                         }
                     )
-                    .border(1.5.dp, NeonWhite.copy(alpha = 0.7f), RoundedCornerShape(12.dp))
-                    .clickable { onClaimClick() }
+                    .border(1.5.dp, if (isClaimedToday) Color(0xFF00E676) else NeonWhite.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
+                    .clickable {
+                        if (!isClaimedToday) {
+                            onClaimClick()
+                        }
+                    }
                     .testTag("btn_daily_reward_claim"),
                 contentAlignment = Alignment.Center
             ) {
@@ -946,16 +1012,20 @@ fun DailyRewardCard(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = if (isClaimed) Icons.Default.Check else Icons.Default.Star,
+                        imageVector = if (isClaimedToday) Icons.Default.Check else Icons.Default.Star,
                         contentDescription = null,
-                        tint = Color(0xFF1A0A00),
+                        tint = if (isClaimedToday) Color.White else Color(0xFF1A0A00),
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = if (isClaimed) "CLAIMED ✅ (+250 COINS)" else "CLAIM +250 COINS NOW",
-                        color = Color(0xFF1A0A00),
-                        fontSize = 14.sp,
+                        text = if (isClaimedToday) {
+                            "CLAIMED TODAY (DAY $currentDay) ✅"
+                        } else {
+                            "CLAIM DAY $currentDay (+${todayRewardCoins} COINS)"
+                        },
+                        color = if (isClaimedToday) Color.White else Color(0xFF1A0A00),
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 0.8.sp
                     )

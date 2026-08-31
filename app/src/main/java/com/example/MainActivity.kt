@@ -82,6 +82,8 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         // Try showing AdMob App Open Ad if available
         AppOpenAdManager.showAdIfAvailable(this)
+        // Refresh daily streak status in case day rolled over
+        viewModel.refreshDailyRewardState()
         // Cancel pending inactivity notification since user is active
         NotificationHelper.cancelOfflineReminder(this)
         // Resume background soundtrack if enabled

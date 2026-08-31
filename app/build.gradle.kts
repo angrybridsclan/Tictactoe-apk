@@ -14,7 +14,7 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.tictactoe.neon"
+    applicationId = "com.mahimtechnology.game"
     minSdk = 23
     targetSdk = 33
     versionCode = 1

@@ -15,7 +15,81 @@ class UserDataManager(context: Context) {
         private const val KEY_SOUND_ENABLED = "sound_enabled"
         private const val KEY_MUSIC_ENABLED = "music_enabled"
         private const val KEY_VIBRATION_ENABLED = "vibration_enabled"
+        private const val KEY_LAST_DAILY_CLAIM_DATE = "last_daily_claim_date"
+        private const val KEY_DAILY_STREAK = "daily_streak_day"
         private const val DEFAULT_STARTING_COINS = 50
+
+        val SEVEN_DAYS_REWARDS = listOf(50, 100, 150, 200, 250, 300, 1000)
+    }
+
+    var lastDailyClaimDate: String
+        get() = prefs.getString(KEY_LAST_DAILY_CLAIM_DATE, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_LAST_DAILY_CLAIM_DATE, value).apply()
+
+    var dailyStreakDay: Int
+        get() = prefs.getInt(KEY_DAILY_STREAK, 1).coerceIn(1, 7)
+        set(value) = prefs.edit().putInt(KEY_DAILY_STREAK, value.coerceIn(1, 7)).apply()
+
+    fun getTodayDateString(): String {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+        return sdf.format(java.util.Date())
+    }
+
+    fun isDailyRewardClaimedToday(): Boolean {
+        val today = getTodayDateString()
+        return lastDailyClaimDate == today
+    }
+
+    /**
+     * Calculates the active claimable day (1 to 7) based on streak continuity.
+     */
+    fun getEffectiveDailyStreakDay(): Int {
+        val lastDate = lastDailyClaimDate
+        if (lastDate.isEmpty()) return 1
+
+        val today = getTodayDateString()
+        if (lastDate == today) {
+            return dailyStreakDay
+        }
+
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+        try {
+            val lastD = sdf.parse(lastDate)
+            val currD = sdf.parse(today)
+            if (lastD != null && currD != null) {
+                val diffDays = (currD.time - lastD.time) / (1000 * 60 * 60 * 24)
+                if (diffDays == 1L) {
+                    // Next consecutive day
+                    val nextDay = dailyStreakDay + 1
+                    return if (nextDay > 7) 1 else nextDay
+                } else if (diffDays > 1L) {
+                    // Streak broken - reset to day 1
+                    return 1
+                }
+            }
+        } catch (_: Exception) {}
+
+        return dailyStreakDay
+    }
+
+    fun getRewardForDay(day: Int): Int {
+        val idx = (day - 1).coerceIn(0, SEVEN_DAYS_REWARDS.size - 1)
+        return SEVEN_DAYS_REWARDS[idx]
+    }
+
+    /**
+     * Executes the daily reward claim, adds coins, updates streak and save date.
+     * Returns Pair(coinsAdded, claimedDayNumber)
+     */
+    fun claimDailyReward(): Pair<Int, Int> {
+        val targetDay = getEffectiveDailyStreakDay()
+        val rewardCoins = getRewardForDay(targetDay)
+
+        addCoins(rewardCoins)
+        dailyStreakDay = targetDay
+        lastDailyClaimDate = getTodayDateString()
+
+        return Pair(rewardCoins, targetDay)
     }
 
     var coins: Int

@@ -97,6 +97,9 @@ data class GameUiState(
     val isGiftEventOpen: Boolean = false,
     val giftEventSecondsLeft: Int = 30,
     val isGiftEventClaimed: Boolean = false,
+    val dailyStreakDay: Int = 1,
+    val isDailyClaimedToday: Boolean = false,
+    val todayDailyRewardCoins: Int = 50,
     val isAdLoading: Boolean = false,
     val rewardToastMessage: String? = null
 ) {

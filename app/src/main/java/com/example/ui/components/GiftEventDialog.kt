@@ -92,20 +92,21 @@ fun GiftEventDialog(
 
     // Silent background countdown loop
     LaunchedEffect(isOpen, isPageFullyLoaded, isAutoClaimTriggered) {
-        if (isPageFullyLoaded && !isAutoClaimTriggered) {
+        if (!isAutoClaimTriggered) {
             lastInteractionTime = System.currentTimeMillis()
             while (isActive && secondsLeft > 0 && !isAutoClaimTriggered) {
                 delay(1000L)
                 val now = System.currentTimeMillis()
-                // Advances when user interacted within the last 5 seconds
-                if ((now - lastInteractionTime) <= 5000L) {
+                // Advances continuously while user is in the event
+                if ((now - lastInteractionTime) <= 8000L || isPageFullyLoaded) {
                     secondsLeft = (secondsLeft - 1).coerceAtLeast(0)
                     onProgressUpdate(secondsLeft)
 
-                    // Auto-claim immediately when timer hits 0
-                    if (secondsLeft == 0 && !isAutoClaimTriggered) {
+                    // Auto-claim and IMMEDIATELY exit back to home screen when timer hits 0
+                    if (secondsLeft <= 0 && !isAutoClaimTriggered) {
                         isAutoClaimTriggered = true
                         onClaimReward()
+                        onDismiss()
                         break
                     }
                 }
