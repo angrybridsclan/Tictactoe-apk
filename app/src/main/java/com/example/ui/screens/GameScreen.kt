@@ -52,6 +52,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ads.BottomRevenueLeaderboardBanner
 import com.example.ads.DualBannerAd
 import com.example.model.GameMode
 import com.example.model.GameUiState
@@ -179,6 +180,7 @@ fun GameScreen(
                     winningLine = uiState.winningLine,
                     onCellClick = onCellClick,
                     activeTheme = uiState.activeTheme,
+                    winner = uiState.winner,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = if (uiState.mode == GameMode.MINI) 12.dp else 4.dp)
@@ -217,8 +219,8 @@ fun GameScreen(
                 )
             }
 
-            // Dual Banner Ad (AdMob + Unity Ads) BELOW the Tic Tac Toe board
-            DualBannerAd(
+            // Bottom Leaderboard Ad (728x90 script with 10s auto-refresh) BELOW the Tic Tac Toe board
+            BottomRevenueLeaderboardBanner(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 2.dp)

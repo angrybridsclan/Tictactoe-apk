@@ -60,10 +60,19 @@ fun NeonGridBoard(
     winningLine: WinningLine?,
     onCellClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    activeTheme: NeonTheme = ThemeCatalog.CLASSIC_CYBER
+    activeTheme: NeonTheme = ThemeCatalog.CLASSIC_CYBER,
+    winner: Player? = null
 ) {
     val n = mode.gridSize
     val isMini = mode == GameMode.MINI
+
+    // Determine winning piece color: if X won -> playerXColor, if O won -> playerOColor
+    val winningPlayer = winner ?: winningLine?.let { line ->
+        line.winningCells.firstOrNull()?.let { (r, c) ->
+            val idx = r * n + c
+            grid.getOrNull(idx)
+        }
+    }
 
     val infiniteTransition = rememberInfiniteTransition(label = "win_pulse")
     val pulseScale by infiniteTransition.animateFloat(
@@ -256,7 +265,8 @@ fun NeonGridBoard(
                         start = Offset(actualStartX, actualStartY),
                         end = Offset(currentEndX, currentEndY),
                         gridSize = n,
-                        theme = activeTheme
+                        theme = activeTheme,
+                        winningPlayer = winningPlayer
                     )
                 }
             }
@@ -442,9 +452,11 @@ private fun DrawScope.drawLaserStrikeLine(
     start: Offset,
     end: Offset,
     gridSize: Int,
-    theme: NeonTheme
+    theme: NeonTheme,
+    winningPlayer: Player? = null
 ) {
-    val laserColor = theme.playerOColor
+    val laserColor = if (winningPlayer == Player.X) theme.playerXColor else theme.playerOColor
+    val laserGlowColor = if (winningPlayer == Player.X) theme.playerXGlow else theme.playerOGlow
 
     val bloomWidth = when {
         gridSize <= 3 -> 16f

@@ -167,6 +167,11 @@ fun TicTacToeApp(viewModel: GameViewModel) {
                     onToggleVibration = { viewModel.toggleVibration() },
                     onOpenShop = { viewModel.openShop() },
                     onOpenPrivacyPolicy = { viewModel.openPrivacyPolicy() },
+                    onOpenGiftEvent = { viewModel.openGiftEvent() },
+                    onCloseGiftEvent = { viewModel.closeGiftEvent() },
+                    onUpdateGiftEventProgress = { seconds -> viewModel.updateGiftEventProgress(seconds) },
+                    onClaimGiftReward = { viewModel.claimGiftEventReward() },
+                    onWatchUnityAd = { viewModel.watchUnityInterstitialAd(activity) },
                     onStartGame = { currentScreen = AppScreen.GAME }
                 )
             }

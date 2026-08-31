@@ -1,174 +1,132 @@
 package com.example.ui.components
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.ui.theme.NeonCoral
-import com.example.ui.theme.NeonCyan
+import com.example.R
 import com.example.ui.theme.NeonGold
 import com.example.ui.theme.NeonGoldBorder
 import com.example.ui.theme.NeonWhite
-import kotlin.math.min
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
- * Custom Tic-Tac-Toe "OX Mix" Cyber Coin Icon.
- * Features an intertwined glowing 'O' and 'X' emblem inside a 3D metallic cyber medallion.
+ * Ultra-realistic 3D Gold Coin with metallic bezel, embedded glowing OX emblem,
+ * and animated specular star shine.
  */
 @Composable
 fun OxCoinIcon(
     modifier: Modifier = Modifier,
-    size: Dp = 20.dp
+    size: Dp = 22.dp
 ) {
-    Canvas(
+    val infiniteTransition = rememberInfiniteTransition(label = "coin_specular_shine")
+    val shineProgress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shine_progress"
+    )
+
+    Box(
         modifier = modifier
             .size(size)
-            .semantics { contentDescription = "OX Coin" }
+            .semantics { contentDescription = "OX Gold Coin" },
+        contentAlignment = Alignment.Center
     ) {
-        val diameter = min(this.size.width, this.size.height)
-        val radius = diameter / 2f
-        val center = Offset(this.size.width / 2f, this.size.height / 2f)
-
-        // 1. Outer Metallic Gold Ring / Rim
-        val rimBrush = Brush.sweepGradient(
-            colors = listOf(
-                Color(0xFFFFF1A8),
-                NeonGold,
-                NeonGoldBorder,
-                Color(0xFFB87800),
-                NeonGold,
-                Color(0xFFFFF1A8)
-            ),
-            center = center
-        )
-        drawCircle(
-            brush = rimBrush,
-            radius = radius,
-            center = center
+        // 1. Realistic 3D Golden Medallion Render
+        Image(
+            painter = painterResource(id = R.drawable.img_gold_coin_1788072234836),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(size)
+                .clip(CircleShape)
+                .shadow(elevation = 2.dp, shape = CircleShape, spotColor = NeonGold)
         )
 
-        // 2. Beveled Inner Rim
-        drawCircle(
-            color = Color(0x55000000),
-            radius = radius * 0.90f,
-            center = center,
-            style = Stroke(width = radius * 0.08f)
-        )
+        // 2. Realistic Specular Golden Sheen & Glint Overlay
+        Canvas(modifier = Modifier.size(size)) {
+            val radius = this.size.minDimension / 2f
+            val center = Offset(this.size.width / 2f, this.size.height / 2f)
 
-        // 3. Deep Cyber Core Medallion Face
-        val coreBrush = Brush.radialGradient(
-            colors = listOf(
-                Color(0xFF33165E),
-                Color(0xFF1F0B3D),
-                Color(0xFF0F041F)
-            ),
-            center = center,
-            radius = radius * 0.85f
-        )
-        drawCircle(
-            brush = coreBrush,
-            radius = radius * 0.82f,
-            center = center
-        )
+            // Outer Hairline Ring with Sweep Gradient for extra metallic pop
+            val rimBrush = Brush.sweepGradient(
+                colors = listOf(
+                    Color(0xFFFFF7C2),
+                    NeonGold,
+                    Color(0xFFFFB300),
+                    Color(0xFFFFE082),
+                    Color(0xFFB87800),
+                    Color(0xFFFFF7C2)
+                ),
+                center = center
+            )
+            drawCircle(
+                brush = rimBrush,
+                radius = radius - 0.5f,
+                center = center,
+                style = Stroke(width = maxOf(1f, radius * 0.08f))
+            )
 
-        // 4. Inner Gold Hairline Ring
-        drawCircle(
-            color = NeonGold.copy(alpha = 0.6f),
-            radius = radius * 0.80f,
-            center = center,
-            style = Stroke(width = maxOf(1f, radius * 0.04f))
-        )
+            // Animated Diamond Glint Sparkle traversing top rim
+            val glintAngle = (shineProgress * 2.0 * Math.PI) - Math.PI / 4.0
+            val glintRadiusFromCenter = radius * 0.65f
+            val glintX = center.x + glintRadiusFromCenter * cos(glintAngle).toFloat()
+            val glintY = center.y + glintRadiusFromCenter * sin(glintAngle).toFloat()
 
-        // 5. The "OX" Emblem:
-        // The 'O': Glowing Neon Cyan Ring
-        val oRadius = radius * 0.44f
-        val oStrokeWidth = radius * 0.18f
-
-        // 'O' Glow shadow
-        drawCircle(
-            color = NeonCyan.copy(alpha = 0.35f),
-            radius = oRadius,
-            center = center,
-            style = Stroke(width = oStrokeWidth * 1.5f)
-        )
-        // 'O' Core stroke
-        drawCircle(
-            color = NeonCyan,
-            radius = oRadius,
-            center = center,
-            style = Stroke(width = oStrokeWidth)
-        )
-
-        // The 'X': Intersecting Neon Coral Cross passing through 'O'
-        val xStrokeWidth = radius * 0.17f
-        val xSpan = radius * 0.46f
-
-        // 'X' Glow
-        drawLine(
-            color = NeonCoral.copy(alpha = 0.35f),
-            start = Offset(center.x - xSpan, center.y - xSpan),
-            end = Offset(center.x + xSpan, center.y + xSpan),
-            strokeWidth = xStrokeWidth * 1.5f,
-            cap = StrokeCap.Round
-        )
-        drawLine(
-            color = NeonCoral.copy(alpha = 0.35f),
-            start = Offset(center.x + xSpan, center.y - xSpan),
-            end = Offset(center.x - xSpan, center.y + xSpan),
-            strokeWidth = xStrokeWidth * 1.5f,
-            cap = StrokeCap.Round
-        )
-
-        // 'X' Core strokes
-        drawLine(
-            color = NeonCoral,
-            start = Offset(center.x - xSpan, center.y - xSpan),
-            end = Offset(center.x + xSpan, center.y + xSpan),
-            strokeWidth = xStrokeWidth,
-            cap = StrokeCap.Round
-        )
-        drawLine(
-            color = NeonCoral,
-            start = Offset(center.x + xSpan, center.y - xSpan),
-            end = Offset(center.x - xSpan, center.y + xSpan),
-            strokeWidth = xStrokeWidth,
-            cap = StrokeCap.Round
-        )
-
-        // Intersect Center Highlight Dot
-        drawCircle(
-            color = NeonWhite,
-            radius = radius * 0.08f,
-            center = center
-        )
-
-        // 6. Top-Left Coin Glint / Specular Sparkle
-        val glintOffset = Offset(center.x - radius * 0.52f, center.y - radius * 0.52f)
-        val glintPath = Path().apply {
-            val glintRadius = radius * 0.14f
-            moveTo(glintOffset.x, glintOffset.y - glintRadius)
-            lineTo(glintOffset.x + glintRadius * 0.35f, glintOffset.y)
-            lineTo(glintOffset.x + glintRadius, glintOffset.y)
-            lineTo(glintOffset.x + glintRadius * 0.35f, glintOffset.y + glintRadius * 0.35f)
-            lineTo(glintOffset.x, glintOffset.y + glintRadius)
-            lineTo(glintOffset.x - glintRadius * 0.35f, glintOffset.y + glintRadius * 0.35f)
-            lineTo(glintOffset.x - glintRadius, glintOffset.y)
-            lineTo(glintOffset.x - glintRadius * 0.35f, glintOffset.y)
-            close()
+            // Subtle Glint Star
+            val glintAlpha = (sin(shineProgress * Math.PI).toFloat()).coerceIn(0f, 1f)
+            if (glintAlpha > 0.1f) {
+                val starSize = radius * 0.28f * glintAlpha
+                val starPath = Path().apply {
+                    moveTo(glintX, glintY - starSize)
+                    lineTo(glintX + starSize * 0.3f, glintY)
+                    lineTo(glintX + starSize, glintY)
+                    lineTo(glintX + starSize * 0.3f, glintY + starSize * 0.3f)
+                    lineTo(glintX, glintY + starSize)
+                    lineTo(glintX - starSize * 0.3f, glintY + starSize * 0.3f)
+                    lineTo(glintX - starSize, glintY)
+                    lineTo(glintX - starSize * 0.3f, glintY - starSize * 0.3f)
+                    close()
+                }
+                drawPath(
+                    path = starPath,
+                    color = NeonWhite.copy(alpha = glintAlpha * 0.9f)
+                )
+                drawCircle(
+                    color = NeonGold.copy(alpha = glintAlpha * 0.5f),
+                    radius = starSize * 0.8f,
+                    center = Offset(glintX, glintY)
+                )
+            }
         }
-        drawPath(
-            path = glintPath,
-            color = NeonWhite.copy(alpha = 0.85f)
-        )
     }
 }

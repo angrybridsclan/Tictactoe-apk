@@ -94,6 +94,9 @@ data class GameUiState(
     val isPrivacyPolicyOpen: Boolean = false,
     val isDifficultyDialogOpen: Boolean = false,
     val isSettingsDialogOpen: Boolean = false,
+    val isGiftEventOpen: Boolean = false,
+    val giftEventSecondsLeft: Int = 30,
+    val isGiftEventClaimed: Boolean = false,
     val isAdLoading: Boolean = false,
     val rewardToastMessage: String? = null
 ) {

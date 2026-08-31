@@ -138,6 +138,34 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(isPrivacyPolicyOpen = false) }
     }
 
+    fun openGiftEvent() {
+        soundManager.playButtonClick(_uiState.value.isSoundEnabled)
+        _uiState.update { it.copy(isGiftEventOpen = true) }
+    }
+
+    fun closeGiftEvent() {
+        soundManager.playButtonClick(_uiState.value.isSoundEnabled)
+        _uiState.update { it.copy(isGiftEventOpen = false) }
+    }
+
+    fun updateGiftEventProgress(secondsLeft: Int) {
+        _uiState.update { it.copy(giftEventSecondsLeft = secondsLeft) }
+    }
+
+    fun claimGiftEventReward() {
+        val newTotal = userDataManager.addCoins(250)
+        soundManager.playWinSound(_uiState.value.isSoundEnabled)
+        _uiState.update {
+            it.copy(
+                coins = newTotal,
+                isGiftEventOpen = false,
+                giftEventSecondsLeft = 0,
+                isGiftEventClaimed = true,
+                rewardToastMessage = "🎉 Auto-Claimed: +250 OX Coins Added!"
+            )
+        }
+    }
+
     fun selectTheme(themeId: String) {
         if (_uiState.value.unlockedThemeIds.contains(themeId)) {
             userDataManager.selectedThemeId = themeId
@@ -155,6 +183,31 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     coins = userDataManager.coins,
                     unlockedThemeIds = userDataManager.unlockedThemes,
                     activeThemeId = themeId
+                )
+            }
+        }
+    }
+
+    fun watchUnityInterstitialAd(activity: Activity?) {
+        if (activity == null) {
+            val newTotal = userDataManager.addCoins(50)
+            soundManager.playWinSound(_uiState.value.isSoundEnabled)
+            _uiState.update {
+                it.copy(
+                    coins = newTotal,
+                    rewardToastMessage = "⚡ +50 Unity Bonus Coins Received!"
+                )
+            }
+            return
+        }
+
+        com.example.ads.UnityAdsManager.showInterstitial(activity) {
+            val newTotal = userDataManager.addCoins(50)
+            soundManager.playWinSound(_uiState.value.isSoundEnabled)
+            _uiState.update {
+                it.copy(
+                    coins = newTotal,
+                    rewardToastMessage = "⚡ +50 Unity Bonus Coins Claimed!"
                 )
             }
         }

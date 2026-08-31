@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,33 +35,47 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.MusicOff
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ads.AdMobNativeAdView
+import androidx.compose.ui.window.Dialog
+import com.example.ads.BigRevenueRectangleBanner
+import com.example.ads.BottomRevenueLeaderboardBanner
 import com.example.ads.DualBannerAd
-import com.example.ads.UnityNativeAd
+import com.example.ads.UnityAdsManager
+import com.example.ads.UnityBannerAd
+import com.example.ads.UnityBigBannerAd
 import com.example.model.AIDifficulty
 import com.example.model.GameMode
 import com.example.model.GameUiState
@@ -67,9 +83,11 @@ import com.example.model.OpponentType
 import com.example.model.Player
 import com.example.model.WinningLine
 import com.example.ui.components.CoinBalanceBadge
+import com.example.ui.components.GiftEventDialog
 import com.example.ui.components.NeonGlowBackground
 import com.example.ui.components.NeonGridBoard
 import com.example.ui.components.OxCoinIcon
+import com.example.ui.theme.NeonCoral
 import com.example.ui.theme.NeonCyan
 import com.example.ui.theme.NeonCyanLight
 import com.example.ui.theme.NeonGold
@@ -89,9 +107,15 @@ fun SelectLevelScreen(
     onToggleVibration: () -> Unit = {},
     onOpenShop: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
+    onOpenGiftEvent: () -> Unit = {},
+    onCloseGiftEvent: () -> Unit = {},
+    onUpdateGiftEventProgress: (Int) -> Unit = {},
+    onClaimGiftReward: () -> Unit = {},
+    onWatchUnityAd: (() -> Unit)? = null,
     onStartGame: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val modes = listOf(GameMode.MINI, GameMode.BIG, GameMode.MEGA)
     var selectedIndex by remember(uiState.mode) {
         val idx = modes.indexOf(uiState.mode)
@@ -112,6 +136,7 @@ fun SelectLevelScreen(
     )
 
     val scrollState = rememberScrollState()
+    var showModeSelectDialog by remember { mutableStateOf(false) }
 
     NeonGlowBackground(modifier = modifier) {
         Column(
@@ -123,27 +148,76 @@ fun SelectLevelScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top Bar: Theme Shop, Coin Balance, Settings
+            // Top Bar: Theme Shop, Lucky Gift Event, Coin Balance, Settings
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left: Theme Shop
-                IconButton(
-                    onClick = onOpenShop,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0x331F1045), CircleShape)
-                        .border(1.5.dp, NeonPurpleBorder, CircleShape)
-                        .testTag("btn_theme_shop")
+                // Left: Theme Shop & Lucky Gift Event Button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Palette,
-                        contentDescription = "Theme Shop",
-                        tint = Color(0xFFFF4081),
-                        modifier = Modifier.size(20.dp)
-                    )
+                    IconButton(
+                        onClick = onOpenShop,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0x331F1045), CircleShape)
+                            .border(1.5.dp, NeonPurpleBorder, CircleShape)
+                            .testTag("btn_theme_shop")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = "Theme Shop",
+                            tint = Color(0xFFFF4081),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Lucky Gift Event Trigger Icon Button with Live Notice
+                    Box(
+                        modifier = Modifier
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color(0xFF4A148C),
+                                        Color(0xFF880E4F)
+                                    )
+                                )
+                            )
+                            .border(1.5.dp, NeonGold, RoundedCornerShape(20.dp))
+                            .clickable { onOpenGiftEvent() }
+                            .padding(horizontal = 8.dp)
+                            .testTag("btn_gift_event"),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CardGiftcard,
+                                contentDescription = "Gift Event",
+                                tint = NeonGold,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            val topNoticeText = when {
+                                uiState.isGiftEventClaimed -> "CLAIMED ✅"
+                                uiState.giftEventSecondsLeft in 1..29 -> "${uiState.giftEventSecondsLeft}s LEFT ⏳"
+                                else -> "GIFT +250"
+                            }
+                            Text(
+                                text = topNoticeText,
+                                color = NeonGold,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+                    }
                 }
 
                 // Center: Coins Badge
@@ -193,7 +267,7 @@ fun SelectLevelScreen(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "SELECT LEVEL • ${currentMode.subtitle}",
+                        text = "TAP BOARD TO PLAY • ${currentMode.subtitle}",
                         color = NeonCyanLight,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
@@ -201,7 +275,7 @@ fun SelectLevelScreen(
                     )
                 }
 
-                // Interactive Level Preview Carousel (3x3, 6x6, 12x12)
+                // Interactive Level Preview Box Carousel - Clickable to launch Game Modes
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -229,11 +303,16 @@ fun SelectLevelScreen(
                         )
                     }
 
-                    // Grid Preview Frame
+                    // Interactive Grid Preview Frame (Click on box opens play selection)
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(horizontal = 6.dp),
+                            .padding(horizontal = 6.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable {
+                                showModeSelectDialog = true
+                            }
+                            .testTag("level_preview_box"),
                         contentAlignment = Alignment.Center
                     ) {
                         AnimatedContent(
@@ -323,51 +402,209 @@ fun SelectLevelScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
-                // Cyber Reward Callout Badge
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
+                // Interactive Gift Event Banner Card
+                Box(
                     modifier = Modifier
                         .fillMaxWidth(0.92f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0x22130B2E))
-                        .border(1.dp, NeonPurpleBorder.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFF2C0B4D),
+                                    Color(0xFF4A0E4E),
+                                    Color(0xFF1F0B3D)
+                                )
+                            )
+                        )
+                        .border(1.5.dp, NeonGold, RoundedCornerShape(14.dp))
+                        .clickable { onOpenGiftEvent() }
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .testTag("banner_gift_event"),
+                    contentAlignment = Alignment.Center
                 ) {
-                    OxCoinIcon(size = 16.dp)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Win matches to earn OX Coins & unlock custom themes",
-                        color = NeonCyan.copy(alpha = 0.9f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF512DA8))
+                                    .border(1.dp, NeonGold, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CardGiftcard,
+                                    contentDescription = "Gift",
+                                    tint = NeonGold,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                val bannerTitle = if (uiState.isGiftEventClaimed) "🎁 GIFT EVENT CLAIMED" else "🎁 LUCKY GIFT EVENT"
+                                val bannerSub = when {
+                                    uiState.isGiftEventClaimed -> "✅ +250 Coins Added! (Tap to visit again)"
+                                    uiState.giftEventSecondsLeft in 1..29 -> "⏳ ${uiState.giftEventSecondsLeft}s remaining! (Tap to auto-claim)"
+                                    else -> "Stay 30s & Auto-Claim +250 Coins"
+                                }
+                                Text(
+                                    text = bannerTitle,
+                                    color = NeonGold,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Text(
+                                    text = bannerSub,
+                                    color = NeonCyanLight,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (uiState.isGiftEventClaimed) Color(0xFF00E676) else NeonGold)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = if (uiState.isGiftEventClaimed) "DONE" else "START",
+                                color = Color(0xFF1A0A00),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                // Main Action: START GAME Button
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.88f)
+                        .height(54.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFF00E5FF),
+                                    Color(0xFF00B0FF),
+                                    Color(0xFF7C4DFF)
+                                )
+                            )
+                        )
+                        .border(2.dp, NeonWhite.copy(alpha = 0.85f), RoundedCornerShape(16.dp))
+                        .clickable {
+                            showModeSelectDialog = true
+                        }
+                        .testTag("btn_start_game"),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "Start",
+                            tint = Color(0xFF06031A),
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "START GAME",
+                            color = Color(0xFF06031A),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.5.sp
+                        )
+                    }
+                }
+
+                // Big High-Revenue Banner (300x250 with 10s auto-refresh)
+                BigRevenueRectangleBanner(
+                    modifier = Modifier.fillMaxWidth(0.94f)
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            // Bottom Leaderboard Banner (728x90 script with 10s auto-refresh)
+            BottomRevenueLeaderboardBanner(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp)
+            )
+        }
+    }
+
+    // Play Selection Modal Dialog when clicking the Box
+    if (showModeSelectDialog) {
+        Dialog(onDismissRequest = { showModeSelectDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.94f)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0xFF0C1033))
+                    .border(2.5.dp, NeonCyan, RoundedCornerShape(22.dp))
+                    .padding(20.dp)
+            ) {
+                // Close button top right
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF00C8FF))
+                        .border(1.5.dp, NeonWhite, CircleShape)
+                        .clickable { showModeSelectDialog = false },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = Color(0xFF0C1033),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // Mode Action Buttons
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth(0.92f),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // Button 1: 👤 vs 🖥️ (Player vs Computer)
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = "SELECT MODE (${currentMode.title})",
+                        color = NeonWhite,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp
+                    )
+
+                    // Option 1: VS Computer
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp)
+                            .height(54.dp)
                             .clip(RoundedCornerShape(14.dp))
                             .background(Color(0xFF0D1445))
                             .border(2.dp, NeonCyan, RoundedCornerShape(14.dp))
                             .clickable {
+                                showModeSelectDialog = false
                                 onOpponentSelected(OpponentType.VS_AI)
                                 onOpenDifficultyDialog()
                             }
-                            .testTag("btn_vs_computer"),
+                            .testTag("btn_modal_vs_computer"),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
@@ -375,7 +612,7 @@ fun SelectLevelScreen(
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Text("👤 vs 🖥️", fontSize = 18.sp)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = "VS COMPUTER (${uiState.aiDifficulty.label})",
                                 color = NeonCyanLight,
@@ -386,19 +623,20 @@ fun SelectLevelScreen(
                         }
                     }
 
-                    // Button 2: 👤 vs 👤 (Player vs Player)
+                    // Option 2: 2 Players (Local)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp)
+                            .height(54.dp)
                             .clip(RoundedCornerShape(14.dp))
                             .background(Color(0xFF0D1445))
                             .border(2.dp, Color(0xFFFFEA00), RoundedCornerShape(14.dp))
                             .clickable {
+                                showModeSelectDialog = false
                                 onOpponentSelected(OpponentType.VS_PLAYER)
                                 onStartGame()
                             }
-                            .testTag("btn_vs_player"),
+                            .testTag("btn_modal_vs_player"),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
@@ -406,7 +644,7 @@ fun SelectLevelScreen(
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Text("👤 vs 👤", fontSize = 18.sp)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = "2 PLAYERS (LOCAL)",
                                 color = Color(0xFFFFEA00),
@@ -417,29 +655,30 @@ fun SelectLevelScreen(
                         }
                     }
 
-                    // Button 3: CAMPAIGN
+                    // Option 3: Campaign Matrix
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp)
+                            .height(54.dp)
                             .clip(RoundedCornerShape(14.dp))
                             .background(Color(0xFF0D1445))
                             .border(2.dp, Color(0xFFFF9900), RoundedCornerShape(14.dp))
                             .clickable {
+                                showModeSelectDialog = false
                                 onOpponentSelected(OpponentType.CAMPAIGN)
                                 onStartGame()
                             }
-                            .testTag("btn_campaign"),
+                            .testTag("btn_modal_campaign"),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text("⭐ CAMPAIGN", fontSize = 16.sp, color = Color(0xFFFF9900), fontWeight = FontWeight.ExtraBold)
+                            Text("⭐", fontSize = 18.sp)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "LEVEL MATRIX",
+                                text = "CAMPAIGN MATRIX",
                                 color = Color(0xFFFFCC80),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
@@ -448,26 +687,18 @@ fun SelectLevelScreen(
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Optional AdMob Native Ad Card for maximum high eCPM impressions
-                AdMobNativeAdView(
-                    modifier = Modifier
-                        .fillMaxWidth(0.92f)
-                        .padding(vertical = 2.dp)
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
             }
-
-            // Bottom Dual Banner Ad (AdMob + Unity Ads Mediation)
-            DualBannerAd(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 2.dp)
-            )
         }
+    }
+
+    // Fullscreen Gift Event Dialog Overlay
+    if (uiState.isGiftEventOpen) {
+        GiftEventDialog(
+            isOpen = uiState.isGiftEventOpen,
+            onDismiss = onCloseGiftEvent,
+            onProgressUpdate = onUpdateGiftEventProgress,
+            onClaimReward = onClaimGiftReward
+        )
     }
 }
 

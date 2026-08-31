@@ -42,7 +42,9 @@ import com.unity3d.services.banners.UnityBannerSize
 @Composable
 fun UnityBannerAd(
     modifier: Modifier = Modifier,
-    placementId: String = UnityAdsManager.PLACEMENT_BANNER
+    placementId: String = UnityAdsManager.PLACEMENT_BANNER,
+    widthDp: Int = 320,
+    heightDp: Int = 50
 ) {
     Box(
         modifier = modifier
@@ -75,8 +77,8 @@ fun UnityBannerAd(
                     if (activity != null) {
                         val handler = Handler(Looper.getMainLooper())
                         val density = ctx.resources.displayMetrics.density
-                        val widthPx = (320 * density).toInt()
-                        val heightPx = (50 * density).toInt()
+                        val widthPx = (widthDp * density).toInt()
+                        val heightPx = (heightDp * density).toInt()
                         var activeBannerView: BannerView? = null
                         var isDestroyed = false
 
@@ -108,7 +110,7 @@ fun UnityBannerAd(
                                 val bannerView = BannerView(
                                     activity,
                                     placementId,
-                                    UnityBannerSize(320, 50)
+                                    UnityBannerSize(widthDp, heightDp)
                                 )
 
                                 bannerView.listener = object : BannerView.IListener {
@@ -194,10 +196,26 @@ fun UnityBannerAd(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp)
+                    .height(heightDp.dp)
             )
         }
     }
+}
+
+/**
+ * Big Prominent Unity Banner Ad (320x100 or Large Banner format).
+ */
+@Composable
+fun UnityBigBannerAd(
+    modifier: Modifier = Modifier,
+    placementId: String = UnityAdsManager.PLACEMENT_BANNER
+) {
+    UnityBannerAd(
+        modifier = modifier,
+        placementId = placementId,
+        widthDp = 320,
+        heightDp = 100
+    )
 }
 
 /**
