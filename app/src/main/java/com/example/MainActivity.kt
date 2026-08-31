@@ -95,6 +95,11 @@ class MainActivity : ComponentActivity() {
         // Schedule offline reminder to notify user after 1 hour of inactivity
         NotificationHelper.scheduleOfflineReminder(this)
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CyberMusicPlayer.stopMusic()
+    }
 }
 
 @Composable

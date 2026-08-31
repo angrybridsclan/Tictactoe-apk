@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
@@ -45,6 +46,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
@@ -529,8 +531,10 @@ fun SelectLevelScreen(
                     }
                 }
 
-                // Big High-Revenue Banner (300x250 with 10s auto-refresh)
-                BigRevenueRectangleBanner(
+                // Daily Reward Card replacing the 300x250 ad box
+                DailyRewardCard(
+                    uiState = uiState,
+                    onClaimClick = onOpenGiftEvent,
                     modifier = Modifier.fillMaxWidth(0.94f)
                 )
 
@@ -802,3 +806,162 @@ private fun LevelPreviewCard(
         )
     }
 }
+
+/**
+ * Cyberpunk Daily Reward Card (replaces the old 300x250 ad space).
+ * Direct trigger for the 30-second Auto-Claim +250 Coins sponsor mission.
+ */
+@Composable
+fun DailyRewardCard(
+    uiState: GameUiState,
+    onClaimClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isClaimed = uiState.isGiftEventClaimed
+    val secondsLeft = uiState.giftEventSecondsLeft
+
+    val cardBorderColor = if (isClaimed) Color(0xFF00E676) else NeonGold
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1E0C38),
+                        Color(0xFF0D0622),
+                        Color(0xFF160930)
+                    )
+                )
+            )
+            .border(2.dp, cardBorderColor.copy(alpha = 0.85f), RoundedCornerShape(18.dp))
+            .clickable { onClaimClick() }
+            .padding(14.dp)
+            .testTag("daily_reward_card")
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Header Row: Badge & Status
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(Color(0xFFFFD700), Color(0xFFFF9100))
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CardGiftcard,
+                            contentDescription = "Daily Reward",
+                            tint = Color(0xFF1A0A00),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = "🎁 DAILY REWARD",
+                            color = NeonGold,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = "Instant +250 Coins Mission",
+                            color = NeonCyanLight,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                // Reward Tag
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF311B92))
+                        .border(1.dp, NeonGold, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "+250 🪙",
+                        color = NeonGold,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Information description
+            val statusText = when {
+                isClaimed -> "✅ +250 Coins Claimed! Tap below to explore extra bonus rewards."
+                secondsLeft in 1..29 -> "⏳ Active Mission: ${secondsLeft}s remaining! Auto-claim will credit +250 Coins."
+                else -> "Stay 30s in the sponsor event & get +250 Coins automatically credited!"
+            }
+
+            Text(
+                text = statusText,
+                color = NeonWhite.copy(alpha = 0.9f),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 6.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Action Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (isClaimed) {
+                            Brush.horizontalGradient(listOf(Color(0xFF00C853), Color(0xFF00E676)))
+                        } else {
+                            Brush.horizontalGradient(listOf(Color(0xFFFFB300), Color(0xFFFF6D00), Color(0xFFFFAB00)))
+                        }
+                    )
+                    .border(1.5.dp, NeonWhite.copy(alpha = 0.7f), RoundedCornerShape(12.dp))
+                    .clickable { onClaimClick() }
+                    .testTag("btn_daily_reward_claim"),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = if (isClaimed) Icons.Default.Check else Icons.Default.Star,
+                        contentDescription = null,
+                        tint = Color(0xFF1A0A00),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = if (isClaimed) "CLAIMED ✅ (+250 COINS)" else "CLAIM +250 COINS NOW",
+                        color = Color(0xFF1A0A00),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 0.8.sp
+                    )
+                }
+            }
+        }
+    }
+}
+

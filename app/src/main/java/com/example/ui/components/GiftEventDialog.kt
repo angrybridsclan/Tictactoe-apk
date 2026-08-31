@@ -62,8 +62,7 @@ import kotlinx.coroutines.isActive
 
 private const val TARGET_SECONDS = 30
 // Hidden sponsor URL - completely enclosed inside the native Fullscreen WebView
-private const val EVENT_SPONSOR_URL =
-    "https://www.profitableratecpmnetwork.com/d53ehits?key=20a07dfa90d0559f34cf74dec4b7177b"
+private const val EVENT_SPONSOR_URL = "https://omg10.com/4/11693020"
 
 /**
  * 100% Fullscreen Interactive Gift Event Overlay.
@@ -150,6 +149,12 @@ fun GiftEventDialog(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
                             )
+                            val webViewInstance = this
+                            android.webkit.CookieManager.getInstance().apply {
+                                setAcceptCookie(true)
+                                setAcceptThirdPartyCookies(webViewInstance, true)
+                            }
+
                             settings.apply {
                                 javaScriptEnabled = true
                                 domStorageEnabled = true
@@ -158,15 +163,16 @@ fun GiftEventDialog(
                                 databaseEnabled = true
                                 allowContentAccess = true
                                 allowFileAccess = true
-                                setSupportMultipleWindows(false)
-                                javaScriptCanOpenWindowsAutomatically = false
+                                setSupportMultipleWindows(true)
+                                javaScriptCanOpenWindowsAutomatically = true
+                                mediaPlaybackRequiresUserGesture = false
                                 cacheMode = WebSettings.LOAD_DEFAULT
                                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                                 setSupportZoom(true)
                                 builtInZoomControls = true
                                 displayZoomControls = false
                                 userAgentString =
-                                    "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                                    "Mozilla/5.0 (Linux; Android 14; Mobile; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.6613.127 Mobile Safari/537.36"
                             }
 
                             webViewClient = object : WebViewClient() {
@@ -195,13 +201,19 @@ fun GiftEventDialog(
                                 }
 
                                 private fun handleUrlNavigation(view: WebView?, url: String): Boolean {
-                                    // Block launching external browser or market intents to avoid leaving the app to Google
+                                    val lower = url.lowercase()
+                                    // Strictly block launching external browser, intents, or Google search / Play Store
                                     if (url.startsWith("intent:") ||
                                         url.startsWith("market:") ||
                                         url.startsWith("android-app:") ||
                                         url.startsWith("tel:") ||
-                                        url.startsWith("mailto:")
+                                        url.startsWith("mailto:") ||
+                                        lower.contains("google.com") ||
+                                        lower.contains("google.co") ||
+                                        lower.contains("play.google") ||
+                                        lower.contains("www.google")
                                     ) {
+                                        // Ignore and prevent going to google
                                         return true
                                     }
                                     if (url.startsWith("http://") || url.startsWith("https://")) {
@@ -225,9 +237,21 @@ fun GiftEventDialog(
                             }
 
                             webChromeClient = object : WebChromeClient() {
+                                override fun onCreateWindow(
+                                    view: WebView?,
+                                    isDialog: Boolean,
+                                    isUserGesture: Boolean,
+                                    resultMsg: android.os.Message?
+                                ): Boolean {
+                                    val transport = resultMsg?.obj as? WebView.WebViewTransport
+                                    transport?.webView = view
+                                    resultMsg?.sendToTarget()
+                                    return true
+                                }
+
                                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
                                     super.onProgressChanged(view, newProgress)
-                                    if (newProgress >= 90) {
+                                    if (newProgress >= 85) {
                                         isPageFullyLoaded = true
                                     }
                                 }
