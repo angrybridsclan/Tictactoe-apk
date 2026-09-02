@@ -1,7 +1,11 @@
 package com.example.ui.components
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
+import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
@@ -202,26 +206,22 @@ fun GiftEventDialog(
                                 }
 
                                 private fun handleUrlNavigation(view: WebView?, url: String): Boolean {
-                                    val lower = url.lowercase()
-                                    // Strictly block launching external browser, intents, or Google search / Play Store
-                                    if (url.startsWith("intent:") ||
-                                        url.startsWith("market:") ||
-                                        url.startsWith("android-app:") ||
-                                        url.startsWith("tel:") ||
-                                        url.startsWith("mailto:") ||
-                                        lower.contains("google.com") ||
-                                        lower.contains("google.co") ||
-                                        lower.contains("play.google") ||
-                                        lower.contains("www.google")
-                                    ) {
-                                        // Ignore and prevent going to google
+                                    lastInteractionTime = System.currentTimeMillis()
+                                    val context = view?.context ?: return false
+
+                                    // Check if it's the initial sponsor URL or its direct domain
+                                    val isInitialUrl = url == EVENT_SPONSOR_URL ||
+                                            url.contains("profitableratecpmnetwork.com")
+
+                                    if (isInitialUrl) {
+                                        // Load directly inside the WebView
+                                        view.loadUrl(url)
                                         return true
                                     }
-                                    if (url.startsWith("http://") || url.startsWith("https://")) {
-                                        view?.loadUrl(url)
-                                        lastInteractionTime = System.currentTimeMillis()
-                                        return true
-                                    }
+
+                                    // If user clicks on extra link / spin redirect / offer link / external landing page:
+                                    // Redirect to Chrome/external browser and keep app running in background
+                                    openInChromeOrBrowser(context, url)
                                     return true
                                 }
 
@@ -244,15 +244,40 @@ fun GiftEventDialog(
                                     isUserGesture: Boolean,
                                     resultMsg: android.os.Message?
                                 ): Boolean {
+                                    val context = view?.context ?: return false
+                                    // When ad/spin triggers window.open(), catch the target URL and open in Chrome
+                                    val popupWebView = WebView(context)
+                                    popupWebView.webViewClient = object : WebViewClient() {
+                                        override fun shouldOverrideUrlLoading(
+                                            v: WebView?,
+                                            request: WebResourceRequest?
+                                        ): Boolean {
+                                            val targetUrl = request?.url?.toString() ?: return false
+                                            openInChromeOrBrowser(context, targetUrl)
+                                            return true
+                                        }
+
+                                        @Deprecated("Deprecated in Java")
+                                        override fun shouldOverrideUrlLoading(
+                                            v: WebView?,
+                                            targetUrl: String?
+                                        ): Boolean {
+                                            if (targetUrl != null) {
+                                                openInChromeOrBrowser(context, targetUrl)
+                                            }
+                                            return true
+                                        }
+                                    }
+
                                     val transport = resultMsg?.obj as? WebView.WebViewTransport
-                                    transport?.webView = view
+                                    transport?.webView = popupWebView
                                     resultMsg?.sendToTarget()
                                     return true
                                 }
 
                                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
                                     super.onProgressChanged(view, newProgress)
-                                    if (newProgress >= 85) {
+                                    if (newProgress >= 80) {
                                         isPageFullyLoaded = true
                                     }
                                 }
@@ -369,5 +394,44 @@ fun GiftEventDialog(
                 webViewRef = null
             } catch (_: Exception) {}
         }
+    }
+}
+
+/**
+ * Safely redirects extra ad/offer links to Chrome or default web browser
+ * while keeping the application running stably in the background.
+ */
+private fun openInChromeOrBrowser(context: Context, url: String) {
+    try {
+        if (url.startsWith("intent:") || url.startsWith("market:") || url.startsWith("android-app:")) {
+            try {
+                val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                return
+            } catch (e: Exception) {
+                Log.w("GiftEvent", "Intent scheme parse failed, falling back: ${e.message}")
+            }
+        }
+
+        val uri = Uri.parse(url)
+        // First attempt to open with Google Chrome specifically if available
+        val chromeIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            setPackage("com.android.chrome")
+        }
+
+        try {
+            context.startActivity(chromeIntent)
+        } catch (_: Exception) {
+            // Fallback to standard system browser
+            val genericIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(genericIntent)
+        }
+    } catch (e: Exception) {
+        Log.e("GiftEvent", "Failed to launch external browser for URL: $url", e)
     }
 }

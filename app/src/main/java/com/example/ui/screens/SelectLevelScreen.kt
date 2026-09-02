@@ -543,11 +543,11 @@ fun SelectLevelScreen(
                 Spacer(modifier = Modifier.height(4.dp))
             }
 
-            // Bottom Leaderboard Banner (728x90 script with 10s auto-refresh)
-            BottomRevenueLeaderboardBanner(
+            // Bottom High-Revenue Banner (AdMob Banner with Unity Fallback)
+            DualBannerAd(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 2.dp)
+                    .padding(horizontal = 4.dp, vertical = 2.dp)
             )
         }
     }

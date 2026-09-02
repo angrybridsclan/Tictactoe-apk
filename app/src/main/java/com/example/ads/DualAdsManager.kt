@@ -88,6 +88,22 @@ object DualAdsManager {
                 onUserEarnedReward = onUserEarnedReward,
                 onAdClosed = {
                     AdMobManager.preloadRewarded(activity)
+                    AdMobManager.preloadRewardedInterstitial(activity)
+                    UnityAdsManager.preloadAds(activity)
+                }
+            )
+            if (shown) return
+        }
+
+        // Priority 1.5: AdMob Rewarded Interstitial (High eCPM)
+        if (AdMobManager.isRewardedInterstitialReady()) {
+            Log.d(TAG, "Showing AdMob Rewarded Interstitial Ad")
+            val shown = AdMobManager.showRewardedInterstitial(
+                activity = activity,
+                onUserEarnedReward = onUserEarnedReward,
+                onAdClosed = {
+                    AdMobManager.preloadRewarded(activity)
+                    AdMobManager.preloadRewardedInterstitial(activity)
                     UnityAdsManager.preloadAds(activity)
                 }
             )

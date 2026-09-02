@@ -219,11 +219,11 @@ fun GameScreen(
                 )
             }
 
-            // Bottom Leaderboard Ad (728x90 script with 10s auto-refresh) BELOW the Tic Tac Toe board
-            BottomRevenueLeaderboardBanner(
+            // Bottom High-Revenue Banner (AdMob Banner with Unity Fallback)
+            DualBannerAd(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 2.dp)
+                    .padding(horizontal = 4.dp, vertical = 2.dp)
             )
         }
     }

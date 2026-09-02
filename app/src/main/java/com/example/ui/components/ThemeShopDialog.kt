@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.ads.AdMobNativeAdView
 import com.example.model.GameUiState
 import com.example.model.NeonTheme
 import com.example.model.ThemeCatalog
@@ -205,7 +206,14 @@ fun ThemeShopDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // AdMob Native Ad (Cyber Galaxy Styled) inside Theme Shop
+                AdMobNativeAdView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
 
                 // Themes Grid
                 LazyVerticalGrid(
@@ -214,7 +222,7 @@ fun ThemeShopDialog(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(340.dp)
+                        .height(280.dp)
                 ) {
                     items(ThemeCatalog.allThemes) { theme ->
                         val isUnlocked = uiState.unlockedThemeIds.contains(theme.id) || theme.price == 0

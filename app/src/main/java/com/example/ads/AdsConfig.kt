@@ -8,12 +8,13 @@ package com.example.ads
  */
 object AdsConfig {
     // Google AdMob Configuration
-    const val ADMOB_APP_ID = "ca-app-pub-6949224585585477~4176392925"
-    const val ADMOB_APP_OPEN_ID = "ca-app-pub-6949224585585477/7470099660"
-    const val ADMOB_BANNER_ID = "ca-app-pub-6949224585585477/3336070070"
-    const val ADMOB_INTERSTITIAL_ID = "ca-app-pub-6949224585585477/9709906737"
-    const val ADMOB_REWARDED_ID = "ca-app-pub-6949224585585477/7824126020"
-    const val ADMOB_NATIVE_ID = "ca-app-pub-6949224585585477/6133623809"
+    const val ADMOB_APP_ID = "ca-app-pub-6949224585585477~9832601170"
+    const val ADMOB_APP_OPEN_ID = "ca-app-pub-6949224585585477/2968304761"
+    const val ADMOB_BANNER_ID = "ca-app-pub-6949224585585477/4538625390"
+    const val ADMOB_INTERSTITIAL_ID = "ca-app-pub-6949224585585477/5693390008"
+    const val ADMOB_REWARDED_ID = "ca-app-pub-6949224585585477/4940536991"
+    const val ADMOB_NATIVE_ID = "ca-app-pub-6949224585585477/1037726059"
+    const val ADMOB_REWARDED_INTERSTITIAL_ID = "ca-app-pub-6949224585585477/9832601170"
 
     // Unity Ads Configuration
     const val UNITY_GAME_ID = "5857887"

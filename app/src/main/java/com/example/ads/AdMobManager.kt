@@ -17,17 +17,20 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Google AdMob Central Manager
- * App ID: ca-app-pub-6949224585585477~4176392925
+ * App ID: ca-app-pub-6949224585585477~9832601170
  * Units:
- * - App Open: ca-app-pub-6949224585585477/7470099660
- * - Banner: ca-app-pub-6949224585585477/3336070070
- * - Interstitial: ca-app-pub-6949224585585477/9709906737
- * - Rewarded: ca-app-pub-6949224585585477/7824126020
- * - Native: ca-app-pub-6949224585585477/6133623809
+ * - App Open: ca-app-pub-6949224585585477/2968304761
+ * - Banner: ca-app-pub-6949224585585477/4538625390
+ * - Interstitial: ca-app-pub-6949224585585477/5693390008
+ * - Rewarded: ca-app-pub-6949224585585477/4940536991
+ * - Native: ca-app-pub-6949224585585477/1037726059
+ * - Rewarded Interstitial: ca-app-pub-6949224585585477/9832601170
  */
 object AdMobManager {
     private const val TAG = "AdMobManager"
@@ -40,6 +43,9 @@ object AdMobManager {
 
     private var rewardedAd: RewardedAd? = null
     private var isRewardedLoading = false
+
+    private var rewardedInterstitialAd: RewardedInterstitialAd? = null
+    private var isRewardedInterstitialLoading = false
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -70,6 +76,7 @@ object AdMobManager {
     fun preloadAds(context: Context) {
         preloadInterstitial(context)
         preloadRewarded(context)
+        preloadRewardedInterstitial(context)
     }
 
     // ==========================================
@@ -224,6 +231,89 @@ object AdMobManager {
 
         currentAd.show(activity) { rewardItem ->
             Log.d(TAG, "User earned AdMob reward: ${rewardItem.amount} ${rewardItem.type}")
+            rewardEarned = true
+        }
+
+        return true
+    }
+
+    // ==========================================
+    // REWARDED INTERSTITIAL ADS
+    // ==========================================
+    fun preloadRewardedInterstitial(context: Context) {
+        if (rewardedInterstitialAd != null || isRewardedInterstitialLoading) return
+        isRewardedInterstitialLoading = true
+
+        val adRequest = AdRequest.Builder().build()
+        Log.d(TAG, "Loading AdMob Rewarded Interstitial Ad: ${AdsConfig.ADMOB_REWARDED_INTERSTITIAL_ID}")
+
+        RewardedInterstitialAd.load(
+            context.applicationContext,
+            AdsConfig.ADMOB_REWARDED_INTERSTITIAL_ID,
+            adRequest,
+            object : RewardedInterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedInterstitialAd) {
+                    Log.d(TAG, "AdMob Rewarded Interstitial Ad loaded successfully")
+                    rewardedInterstitialAd = ad
+                    isRewardedInterstitialLoading = false
+                }
+
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    Log.w(TAG, "AdMob Rewarded Interstitial Ad failed to load: ${loadAdError.message}")
+                    rewardedInterstitialAd = null
+                    isRewardedInterstitialLoading = false
+                    mainHandler.postDelayed({
+                        preloadRewardedInterstitial(context)
+                    }, 30000)
+                }
+            }
+        )
+    }
+
+    fun isRewardedInterstitialReady(): Boolean {
+        return rewardedInterstitialAd != null
+    }
+
+    fun showRewardedInterstitial(
+        activity: Activity,
+        onUserEarnedReward: () -> Unit,
+        onAdClosed: () -> Unit
+    ): Boolean {
+        val currentAd = rewardedInterstitialAd
+        if (currentAd == null) {
+            Log.d(TAG, "AdMob Rewarded Interstitial not ready")
+            preloadRewardedInterstitial(activity)
+            return false
+        }
+
+        var rewardEarned = false
+
+        currentAd.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                Log.d(TAG, "AdMob Rewarded Interstitial dismissed")
+                rewardedInterstitialAd = null
+                preloadRewardedInterstitial(activity)
+                if (rewardEarned) {
+                    onUserEarnedReward()
+                }
+                onAdClosed()
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                Log.e(TAG, "AdMob Rewarded Interstitial failed to show: ${adError.message}")
+                rewardedInterstitialAd = null
+                preloadRewardedInterstitial(activity)
+                onAdClosed()
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                Log.d(TAG, "AdMob Rewarded Interstitial showing")
+                rewardedInterstitialAd = null
+            }
+        }
+
+        currentAd.show(activity) { rewardItem ->
+            Log.d(TAG, "User earned AdMob Rewarded Interstitial reward: ${rewardItem.amount} ${rewardItem.type}")
             rewardEarned = true
         }
 
