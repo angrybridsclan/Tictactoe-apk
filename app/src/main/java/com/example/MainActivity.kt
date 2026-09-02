@@ -66,6 +66,9 @@ class MainActivity : ComponentActivity() {
         // Initialize Notification Channels
         NotificationHelper.createNotificationChannels(applicationContext)
 
+        // Start Cyberpunk Background Soundtrack
+        CyberMusicPlayer.startMusic(viewModel.userDataManager.isMusicEnabled)
+
         setContent {
             MyApplicationTheme {
                 Surface(
@@ -174,6 +177,7 @@ fun TicTacToeApp(viewModel: GameViewModel) {
                     onToggleVibration = { viewModel.toggleVibration() },
                     onOpenShop = { viewModel.openShop() },
                     onOpenPrivacyPolicy = { viewModel.openPrivacyPolicy() },
+                    onClaimDailyReward = { viewModel.claimDailyReward() },
                     onOpenGiftEvent = { viewModel.openGiftEvent() },
                     onCloseGiftEvent = { viewModel.closeGiftEvent() },
                     onUpdateGiftEventProgress = { seconds -> viewModel.updateGiftEventProgress(seconds) },

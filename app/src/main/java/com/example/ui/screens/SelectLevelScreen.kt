@@ -110,6 +110,7 @@ fun SelectLevelScreen(
     onToggleVibration: () -> Unit = {},
     onOpenShop: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
+    onClaimDailyReward: () -> Unit = {},
     onOpenGiftEvent: () -> Unit = {},
     onCloseGiftEvent: () -> Unit = {},
     onUpdateGiftEventProgress: (Int) -> Unit = {},
@@ -535,7 +536,7 @@ fun SelectLevelScreen(
                 // Daily Reward Card replacing the 300x250 ad box
                 DailyRewardCard(
                     uiState = uiState,
-                    onClaimClick = onOpenGiftEvent,
+                    onClaimClick = onClaimDailyReward,
                     modifier = Modifier.fillMaxWidth(0.94f)
                 )
 
@@ -551,22 +552,22 @@ fun SelectLevelScreen(
         }
     }
 
-    // Play Selection Modal Dialog when clicking the Box
+    // Play Selection Modal Dialog when clicking Start or Grid Box
     if (showModeSelectDialog) {
         Dialog(onDismissRequest = { showModeSelectDialog = false }) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.94f)
-                    .clip(RoundedCornerShape(22.dp))
+                    .fillMaxWidth(0.88f)
+                    .clip(RoundedCornerShape(20.dp))
                     .background(Color(0xFF0C1033))
-                    .border(2.5.dp, NeonCyan, RoundedCornerShape(22.dp))
-                    .padding(20.dp)
+                    .border(2.dp, NeonCyan, RoundedCornerShape(20.dp))
+                    .padding(18.dp)
             ) {
                 // Close button top right
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .size(34.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(Color(0xFF00C8FF))
                         .border(1.5.dp, NeonWhite, CircleShape)
@@ -577,65 +578,39 @@ fun SelectLevelScreen(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
                         tint = Color(0xFF0C1033),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Spacer(modifier = Modifier.height(2.dp))
 
                     Text(
-                        text = "SELECT MODE (${currentMode.title})",
+                        text = "SELECT MODE",
                         color = NeonWhite,
-                        fontSize = 18.sp,
+                        fontSize = 17.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.sp
+                        letterSpacing = 1.2.sp
                     )
 
-                    // Option 1: VS Computer
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(54.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF0D1445))
-                            .border(2.dp, NeonCyan, RoundedCornerShape(14.dp))
-                            .clickable {
-                                showModeSelectDialog = false
-                                onOpponentSelected(OpponentType.VS_AI)
-                                onOpenDifficultyDialog()
-                            }
-                            .testTag("btn_modal_vs_computer"),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text("👤 vs 🖥️", fontSize = 18.sp)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = "VS COMPUTER (${uiState.aiDifficulty.label})",
-                                color = NeonCyanLight,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            )
-                        }
-                    }
+                    Spacer(modifier = Modifier.height(2.dp))
 
-                    // Option 2: 2 Players (Local)
+                    // Option 1: PVP (2 Players)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp)
+                            .height(52.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF0D1445))
-                            .border(2.dp, Color(0xFFFFEA00), RoundedCornerShape(14.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFF1B1446), Color(0xFF2E1A66))
+                                )
+                            )
+                            .border(1.8.dp, Color(0xFFFFEA00), RoundedCornerShape(14.dp))
                             .clickable {
                                 showModeSelectDialog = false
                                 onOpponentSelected(OpponentType.VS_PLAYER)
@@ -648,46 +623,50 @@ fun SelectLevelScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text("👤 vs 👤", fontSize = 18.sp)
+                            Text("👥", fontSize = 18.sp)
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                text = "2 PLAYERS (LOCAL)",
+                                text = "PVP",
                                 color = Color(0xFFFFEA00),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp
                             )
                         }
                     }
 
-                    // Option 3: Campaign Matrix
+                    // Option 2: PVCOMPUTER
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp)
+                            .height(52.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF0D1445))
-                            .border(2.dp, Color(0xFFFF9900), RoundedCornerShape(14.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFF0C244A), Color(0xFF0E386B))
+                                )
+                            )
+                            .border(1.8.dp, NeonCyan, RoundedCornerShape(14.dp))
                             .clickable {
                                 showModeSelectDialog = false
-                                onOpponentSelected(OpponentType.CAMPAIGN)
-                                onStartGame()
+                                onOpponentSelected(OpponentType.VS_AI)
+                                onOpenDifficultyDialog()
                             }
-                            .testTag("btn_modal_campaign"),
+                            .testTag("btn_modal_vs_computer"),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Text("⭐", fontSize = 18.sp)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("🤖", fontSize = 18.sp)
+                            Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                text = "CAMPAIGN MATRIX",
-                                color = Color(0xFFFFCC80),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                                text = "PVCOMPUTER",
+                                color = NeonCyanLight,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp
                             )
                         }
                     }
@@ -856,35 +835,39 @@ fun DailyRewardCard(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(Color(0xFFFFD700), Color(0xFFFF9100))
-                                )
-                            ),
+                            .background(Color(0xFF1E1438))
+                            .border(1.5.dp, NeonGold, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.CardGiftcard,
-                            contentDescription = "Daily Reward",
-                            tint = Color(0xFF1A0A00),
-                            modifier = Modifier.size(22.dp)
-                        )
+                        OxCoinIcon(size = 28.dp)
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "🎁 7-DAYS DAILY REWARD",
+                            text = "7-DAYS DAILY REWARD",
                             color = NeonGold,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 0.8.sp
                         )
-                        Text(
-                            text = if (isClaimedToday) "Claimed for today! Next reward tomorrow." else "Day $currentDay Active: Claim +$todayRewardCoins Coins!",
-                            color = if (isClaimedToday) Color(0xFF00E676) else NeonCyanLight,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (isClaimedToday) {
+                                Text(
+                                    text = "Claimed for today! Next reward tomorrow.",
+                                    color = Color(0xFF00E676),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            } else {
+                                Text(
+                                    text = "Day $currentDay Active: Claim +$todayRewardCoins ",
+                                    color = NeonCyanLight,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                OxCoinIcon(size = 13.dp)
+                            }
+                        }
                     }
                 }
 
@@ -954,23 +937,28 @@ fun DailyRewardCard(
                                 fontWeight = FontWeight.Bold
                             )
 
-                            Spacer(modifier = Modifier.height(2.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             if (isPastClaimed) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Claimed",
-                                    tint = Color(0xFF00E676),
-                                    modifier = Modifier.size(16.dp)
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF00E676).copy(alpha = 0.2f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Claimed",
+                                        tint = Color(0xFF00E676),
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
                             } else {
-                                Text(
-                                    text = if (isDay7) "🔥" else "🪙",
-                                    fontSize = 13.sp
-                                )
+                                OxCoinIcon(size = if (isDay7) 22.dp else 18.dp)
                             }
 
-                            Spacer(modifier = Modifier.height(2.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             Text(
                                 text = "+$reward",
@@ -1011,24 +999,32 @@ fun DailyRewardCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        imageVector = if (isClaimedToday) Icons.Default.Check else Icons.Default.Star,
-                        contentDescription = null,
-                        tint = if (isClaimedToday) Color.White else Color(0xFF1A0A00),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = if (isClaimedToday) {
-                            "CLAIMED TODAY (DAY $currentDay) ✅"
-                        } else {
-                            "CLAIM DAY $currentDay (+${todayRewardCoins} COINS)"
-                        },
-                        color = if (isClaimedToday) Color.White else Color(0xFF1A0A00),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.8.sp
-                    )
+                    if (isClaimedToday) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "CLAIMED TODAY (DAY $currentDay) ✅",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.8.sp
+                        )
+                    } else {
+                        OxCoinIcon(size = 20.dp)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "CLAIM DAY $currentDay (+${todayRewardCoins} COINS)",
+                            color = Color(0xFF1A0A00),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.8.sp
+                        )
+                    }
                 }
             }
         }

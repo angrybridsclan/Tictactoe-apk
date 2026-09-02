@@ -65,7 +65,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             it.copy(
                 dailyStreakDay = streak,
                 isDailyClaimedToday = isClaimed,
-                isGiftEventClaimed = isClaimed,
                 todayDailyRewardCoins = reward
             )
         }
@@ -160,7 +159,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun openGiftEvent() {
         soundManager.playButtonClick(_uiState.value.isSoundEnabled)
-        _uiState.update { it.copy(isGiftEventOpen = true) }
+        _uiState.update {
+            it.copy(
+                isGiftEventOpen = true,
+                giftEventSecondsLeft = 30,
+                isGiftEventClaimed = false
+            )
+        }
     }
 
     fun closeGiftEvent() {
@@ -172,19 +177,40 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(giftEventSecondsLeft = secondsLeft) }
     }
 
+    /**
+     * Unlimited Lucky Gift Event Reward (+250 OX Coins every time user completes 30s)
+     */
     fun claimGiftEventReward() {
+        val newTotal = userDataManager.addCoins(250)
+        soundManager.playWinSound(_uiState.value.isSoundEnabled)
+        _uiState.update {
+            it.copy(
+                coins = newTotal,
+                isGiftEventOpen = false,
+                giftEventSecondsLeft = 0,
+                isGiftEventClaimed = true,
+                rewardToastMessage = "🎁 Gift Reward Claimed: +250 OX Coins Added!"
+            )
+        }
+    }
+
+    /**
+     * 7-Day Progressive Daily Reward Streak (Once per day: 50, 100, 150, 200, 250, 300, 1000)
+     */
+    fun claimDailyReward() {
+        if (userDataManager.isDailyRewardClaimedToday()) {
+            _uiState.update { it.copy(rewardToastMessage = "You already claimed today's reward! Come back tomorrow.") }
+            return
+        }
         val (rewardCoins, claimedDay) = userDataManager.claimDailyReward()
         soundManager.playWinSound(_uiState.value.isSoundEnabled)
         _uiState.update {
             it.copy(
                 coins = userDataManager.coins,
-                isGiftEventOpen = false,
-                giftEventSecondsLeft = 0,
-                isGiftEventClaimed = true,
                 isDailyClaimedToday = true,
                 dailyStreakDay = claimedDay,
                 todayDailyRewardCoins = rewardCoins,
-                rewardToastMessage = "🎉 Day $claimedDay Reward Claimed: +$rewardCoins OX Coins Added!"
+                rewardToastMessage = "🎉 Day $claimedDay Daily Reward: +$rewardCoins OX Coins Added!"
             )
         }
     }

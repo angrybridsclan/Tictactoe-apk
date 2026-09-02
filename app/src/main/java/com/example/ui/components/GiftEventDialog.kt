@@ -62,7 +62,7 @@ import kotlinx.coroutines.isActive
 
 private const val TARGET_SECONDS = 30
 // Hidden sponsor URL - completely enclosed inside the native Fullscreen WebView
-private const val EVENT_SPONSOR_URL = "https://omg10.com/4/11693020"
+private const val EVENT_SPONSOR_URL = "https://www.profitableratecpmnetwork.com/d53ehits?key=20a07dfa90d0559f34cf74dec4b7177b"
 
 /**
  * 100% Fullscreen Interactive Gift Event Overlay.

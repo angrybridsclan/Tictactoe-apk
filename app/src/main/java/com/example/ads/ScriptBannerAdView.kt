@@ -186,7 +186,7 @@ fun BigRevenueRectangleBanner(
 }
 
 /**
- * Bottom Leaderboard Banner Ad (728x90 or standard 320x50/300x50) with 10 sec refresh
+ * Bottom Standard Banner Ad (320x50) with 10 sec refresh
  */
 @Composable
 fun BottomRevenueLeaderboardBanner(
@@ -195,10 +195,10 @@ fun BottomRevenueLeaderboardBanner(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(96.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .height(56.dp)
+            .clip(RoundedCornerShape(8.dp))
             .background(Color(0xFF070314).copy(alpha = 0.92f))
-            .border(1.dp, Color(0xFFE040FB).copy(alpha = 0.7f), RoundedCornerShape(10.dp)),
+            .border(1.dp, Color(0xFFE040FB).copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
         contentAlignment = Alignment.Center
     ) {
         ScriptBannerAdView(
@@ -208,7 +208,7 @@ fun BottomRevenueLeaderboardBanner(
             refreshIntervalSeconds = 10L,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(90.dp)
+                .height(50.dp)
         )
     }
 }
